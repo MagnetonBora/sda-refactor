@@ -1,12 +1,18 @@
-#!/usr/bin/python
-from logging import info
-
-
-class FileFormatException(IOError):
+class FileFormatException(Exception):
     pass
 
 
-def get_max_accessories():
+def read_products(path: str):
+    with open(path) as file:
+        for line in file:
+            splitted = line.split(":")
+            if len(splitted) != 2:
+                raise FileFormatException("Line cannot be split by ':'")
+            product_id, accessories = splitted
+            yield int(product_id), len(accessories.split(","))
+
+
+def get_max_accessories(path: str):
     """
     Function, that finds product ID with the highest number of accessories.
     For example, if accessories.txt contains:
@@ -17,23 +23,20 @@ def get_max_accessories():
     Returns (12, 6)
     """
     try:
-        f = open("/home/some_user/accessories.txt")
-        products = {}
-        for line in f.readlines():
-            line_splited = line.split(":")
-            if len(line_splited) != 2:
-                raise FileFormatException("Line cannot be split by ':'")
-            product_id, accessories = line_splited
-            accessories = accessories.split(",")
-            products[product_id] = len(accessories)
-        f.close()
-        return sorted(products.iteritems(), key=lambda x: x[1], reverse=True)[0]
+        product_id_max = None
+        accessories_max = 0
+        for product_id, accessories_count in read_products(path):
+            if accessories_count >= accessories_max:
+                accessories_max = accessories_count
+                product_id_max = product_id
+        return product_id_max, accessories_max
     except IOError:
-        info("Some I/O Problems")
+        print("Some I/O Problems")
     except FileFormatException:
-        info("Bad input file. Please check format of your file")
+        print("Bad input file. Please check format of your file")
         raise
-    return []
+    return None
 
 
-print(get_max_accessories())
+if __name__ == "__main__":
+    print(get_max_accessories("accessories.txt"))
