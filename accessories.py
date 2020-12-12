@@ -1,3 +1,29 @@
+import logging.config
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            'format': '%(asctime)s %(levelname)s %(name)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+        }
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger('accessories_application')
+
+
 class FileFormatException(Exception):
     pass
 
@@ -31,11 +57,11 @@ def get_max_accessories(path: str):
                 product_id_max = product_id
         return product_id_max, accessories_max
     except IOError:
-        print("Some I/O Problems")
+        logger.info("Some I/O Problems")
     except FileFormatException:
-        print("Bad input file. Please check format of your file")
+        logger.info("Bad input file. Please check format of your file")
         raise
-    return None
+    return []
 
 
 if __name__ == "__main__":
